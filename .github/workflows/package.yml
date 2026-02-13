@@ -1,0 +1,21 @@
+name: 📦 仅打包不部署
+on: [workflow_dispatch] # 只有手动点击才运行
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: 安装与构建
+        run: |
+          npm install --production
+          npm run build # 如果 KVideo 需要构建
+      - name: 压缩文件
+        run: zip -r release.zip . -x ".git/*" ".github/*"
+      - name: 上传成品
+        uses: actions/upload-artifact@v4
+        with:
+          name: kvideo-release
+          path: release.zip
