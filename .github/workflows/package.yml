@@ -1,5 +1,5 @@
 name: 📦 仅打包不部署
-on: [workflow_dispatch] # 只有手动点击才运行
+on: [workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -8,13 +8,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: 安装与构建
+
+      - name: 🛠️ 安装完整依赖 (包含 TypeScript)
+        run: npm install  # 去掉 --production，安装完整环境
+
+      - name: 🏗️ 构建项目 (Build)
+        run: npm run build  # 这一步现在能找到 typescript 了
+
+      - name: 🧹 清理开发依赖 (减小体积)
         run: |
-          npm install --production
-          npm run build # 如果 KVideo 需要构建
-      - name: 压缩文件
+          rm -rf node_modules
+          npm install --production  # 重新安装仅生产环境需要的包，适合 100MB 空间
+
+      - name: 📦 压缩文件
         run: zip -r release.zip . -x ".git/*" ".github/*"
-      - name: 上传成品
+
+      - name: 📤 上传成品
         uses: actions/upload-artifact@v4
         with:
           name: kvideo-release
